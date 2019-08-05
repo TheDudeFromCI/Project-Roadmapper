@@ -169,3 +169,14 @@ class Timeline():
 
         for t in task.steps:
             self.delete(t)
+
+    """
+    Gets the root task for this timeline. This is the task
+    which has no parent tasks. May return None if timeline
+    is not formatted correctly.
+    """
+    def getRoot(self):
+        for task in self.tasks:
+            if task.parent == None:
+                return task
+        return None

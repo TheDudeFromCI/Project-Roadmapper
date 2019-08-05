@@ -140,7 +140,7 @@ def parseCommand(main, command):
                 return True
             
             except Exception as e:
-                print('Failed to load timeline!')
+                print('Failed to print timeline!')
                 print('  ' + str(e))
                 return False
 
@@ -153,6 +153,9 @@ def parseCommand(main, command):
         return False
 
 def printSceneRecursive(task, depth):
+    if task == None:
+        return
+    
     print('  ' * depth + task.name)
 
     for step in task.steps:

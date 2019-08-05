@@ -119,7 +119,7 @@ class Timeline():
     Finds a task within this timeline by its name. If multiple
     tasks have the same name, the first task is returned. If
     this timeline does not contain a task with the given name,
-    a new task is created and return
+    a new task is created and returned.
 
     Attributes:
         name -- The name of the task to look for.
@@ -135,7 +135,8 @@ class Timeline():
 
     """
     Finds a task within this timeline by its id. If there
-    is no task with the given id, None is returned.
+    is no task with the given id, a new task is created and
+    returned.
 
     Attributes:
         id -- The id of the task to look for.
@@ -144,7 +145,11 @@ class Timeline():
         for t in self.tasks:
             if t.id == id:
                 return t
-        return None
+
+        t = Task('Task')
+        t.id = id
+        self.tasks.append(t)
+        return t
 
     """
     Deletes a task and all subtasks for that task. All

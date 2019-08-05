@@ -47,9 +47,7 @@ def load(path):
 
     for line in lines:
         if line.startswith('t:'):
-            task = Task('Task')
-            task.id = line[2:]
-            timeline.tasks.append(task)
+            task = timeline.getTaskById(line[2:])
             
         elif line.startswith('name='):
             task.name = line[5:]
@@ -58,17 +56,19 @@ def load(path):
             task.description = line[12:]
 
         elif line.startswith('dependencies='):
-            list = line[14:-1].split(', ')
-            for id in list:
-                dep = timeline.getTaskById(id)
-                task.dependencies.append()
+            if line[14:-1] != '':
+                list = line[14:-1].split(', ')
+                for id in list:
+                    dep = timeline.getTaskById(id)
+                    task.dependencies.append(dep)
 
         elif line.startswith('steps='):
-            list = line[7:-1].split(', ')
-            for id in list:
-                step = timeline.getTaskById(id)
-                task.steps.append(step)
-                step.parent = task
+            if line[7:-1] != '':
+                list = line[7:-1].split(', ')
+                for id in list:
+                    step = timeline.getTaskById(id)
+                    task.steps.append(step)
+                    step.parent = task
 
         elif line.startswith('complete='):
             task.complete = bool(line[9:])

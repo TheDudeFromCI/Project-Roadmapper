@@ -1,0 +1,30 @@
+t:ad921a4bd7394bacb6813bb5cd5b5177
+name=Awgen v0.1.0a
+description=
+dependencies=[]
+steps=[4f8c51b69b194053a67248b3946a8a81, 0ea4bbd56d104f2bab84a6e204a6d955, e1a74a1455f04b33a501d2a3378869c8]
+complete=False
+t:4f8c51b69b194053a67248b3946a8a81
+name=Scene Framework
+description=
+dependencies=[]
+steps=[]
+complete=False
+t:0ea4bbd56d104f2bab84a6e204a6d955
+name=Networking
+description=
+dependencies=[]
+steps=[]
+complete=False
+t:e1a74a1455f04b33a501d2a3378869c8
+name=Rendering Engine
+description=
+dependencies=[]
+steps=[e11c7e823e4344c1848a31c035ac052f]
+complete=False
+t:e11c7e823e4344c1848a31c035ac052f
+name=Model Rendering
+description=
+dependencies=[]
+steps=[]
+complete=False

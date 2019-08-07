@@ -1,33 +1,54 @@
 #!/usr/bin/python
 
-import os.path
 import pygame
-from pygame.locals import *
-import pygame_textinput
-import commands
 
+BACKGROUND_COLOR = (160, 160, 160)
+
+"""
+This class is a wrapper for all rendering and updating events which
+occur for the application. This also handles windows and input event.
+"""
 class Visuals():
-    def __init__(self, main, fps = 30, windowName = 'Project Roadmapper'):
-        self.main = main
-        pygame.init()
-        
-        self.screen = pygame.display.set_mode((800, 600))
-        self.background = pygame.Surface(self.screen.get_size())
 
+    """
+    Creates a new visuals object. This will also initialize pygame and
+    create a window in the process.
+
+    Attributes:
+        main -- A reference to the main application container.
+        fps -- The framerate to render at. Defaults to 30.
+        windowName -- The name of the window. Defaults to 'Project Roadmapper'.
+    """
+    def __init__(self, main, fps = 30, windowName = 'Project Roadmapper'):
+        # Set class properties
+        self.main = main
+        self.fps = fps
+
+        # Setup Pygame
+        pygame.init()
+
+        # Setup Window
+        self.screen_size = (800, 600)
+        self.update_surface()
         pygame.display.set_caption(windowName)
 
-        self.fps = fps
+        # Setup framerate sync
         self.clock = pygame.time.Clock()
+        self.time = 0
 
-        self.textinput = pygame_textinput.TextInput(font_family = 'Ubuntu Mono', font_size = 21)
+    """
+    Called internally to update the surface and background size to match
+    the window size.
+    """
+    def update_surface(self):
+        self.screen = pygame.display.set_mode(self.screen_size, pygame.RESIZABLE)
+        self.background = pygame.Surface(self.screen_size)
 
-        # Build console font
-        self.font = 'Ubuntu Mono'
-        if not os.path.isfile(self.font):
-            self.font = pygame.font.match_font(self.font)
-        self.font = pygame.font.Font(self.font, 18)
-        self.console = []
-
+    """
+    Starts the render loop. This will cause update events and rendering
+    events to be called continuously until a close request is made. This
+    function will also clean up whent the loop ends.
+    """
     def loop(self):
         self.running = True
         while self.running:
@@ -36,40 +57,43 @@ class Visuals():
             
         self.quit()
 
+    """
+    Called internally to update timing and handle all pending events.
+    """
     def update(self):
         # Update framerate
-        self.clock.tick(self.fps)
+        self.time += self.clock.tick(self.fps) / 1000.0
 
         # Check for events
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
                 self.running = False
-                
-        # Push events to text editor
-        if self.textinput.update(events):
-            if self.textinput.get_text() != '':
-                commands.parseCommand(self.main, self.textinput.get_text())
-                self.console.insert(0, '> ' + self.textinput.get_text())
 
-                if len(self.console) > 5:
-                    self.console = self.console[:-1]
-                
-                self.textinput.clear_text()
+            if event.type == pygame.VIDEORESIZE:
+                self.screen_size = (event.w, event.h)
+                self.update_surface()
 
+        self.main.console.update(events)
+
+    """
+    Called internally to render the current image to the window.
+    """
     def draw(self):
+        bg = self.background
+        
         # Clear screen
-        self.background.fill((160, 160, 160))
+        bg.fill(BACKGROUND_COLOR)
 
-        # Render console text
-        self.background.blit(self.textinput.get_surface(), (4, 0))
-
-        for index, line in enumerate(self.console):
-            self.background.blit(self.font.render(line, 0, (0, 0, 0)), (4, 22 + 18 * index))
+        # Render console
+        self.main.console.render(bg)
 
         # Update frame
-        self.screen.blit(self.background, (0, 0))
+        self.screen.blit(bg, (0, 0))
         pygame.display.update()
-        
+
+    """
+    Called internally to clean up pygame and dispose resources.
+    """
     def quit(self):
         pygame.quit()

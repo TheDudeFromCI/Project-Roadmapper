@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import os
 import shlex
 from tasks import Task
 from tasks import Timeline
@@ -7,156 +8,176 @@ from tasks import TaskException
 from projectfile import save
 from projectfile import load
 
+def log(output, line):
+    output.append(line)
+    print(line)
+
 def parseCommand(main, command):
+    output = []
     try:
         command = command.strip()
         if command == '':
-            return False
+            return False, output
         
         words = shlex.split(command)
 
-        if words[0] == 'stp': # Step
+        if words[0] == 'step': # Step
             
             if len(words) != 3:
-                print('Unknown number of arguments!')
-                return False
+                log(output, 'Unknown number of arguments!')
+                return False, output
 
             try:
                 task = main.timeline.getTaskByName(words[1])
                 subtask = main.timeline.getTaskByName(words[2])
                 task.hasStep(subtask)
 
-                print(subtask.name + ' is now a subtask of ' + task.name)
-                return True
+                log(output, subtask.name + ' is now a subtask of ' + task.name)
+                return True, output
             
             except TaskException as e:
-                print('Failed to execute task!')
-                print('  ' + e.message)
-                return False
+                log(output, 'Failed to execute task!')
+                log(output, '  ' + e.message)
+                return False, output
             
         elif words[0] == 'dep': # Depends
             
             if len(words) != 3:
-                print('Unknown number of arguments!')
-                return False
+                log(output, 'Unknown number of arguments!')
+                return False, output
 
             try:
                 task = main.timeline.getTaskByName(words[1])
                 subtask = main.timeline.getTaskByName(words[2])
                 task.dependsOn(subtask)
                 
-                print(task.name + ' now depends on ' + subtask.name)
-                return True
+                log(output, task.name + ' now depends on ' + subtask.name)
+                return True, output
             
             except TaskException as e:
-                print('Failed to execute task!')
-                print('  ' + e.message)
-                return False
+                log(output, 'Failed to execute task!')
+                log(output, '  ' + e.message)
+                return False, output
 
-        elif words[0] == 'ren': # Rename
+        elif words[0] == 'rn': # Rename
             
             if len(words) != 3:
-                print('Unknown number of arguments!')
-                return False
+                log(output, 'Unknown number of arguments!')
+                return False, output
 
             try:
                 task = main.timeline.getTaskByName(words[1])
                 task.name = words[2]
 
-                print(words[1] + ' has been renamed to ' + task.name)
-                return True
+                log(output, words[1] + ' has been renamed to ' + task.name)
+                return True, output
             
             except TaskException as e:
-                print('Failed to execute task!')
-                print('  ' + e.message)
-                return False
+                log(output, 'Failed to execute task!')
+                log(output, '  ' + e.message)
+                return False, output
 
         elif words[0] == 'del': # Delete
             
             if len(words) != 2:
-                print('Unknown number of arguments!')
-                return False
+                log(output, 'Unknown number of arguments!')
+                return False, output
 
             try:
                 if main.timeline.hasTask(name = words[1]):
                     task = main.timeline.getTaskByName(words[1])
                     main.timeline.delete(task)
 
-                    print(task.name + ' has been deleted.')
-                    return True
+                    log(output, task.name + ' has been deleted.')
+                    return True, output
                 
                 else:
-                    print('There is no task with that name!')
-                    return False
+                    log(output, 'There is no task with that name!')
+                    return False, output
             
             except TaskException as e:
-                print('Failed to execute task!')
-                print('  ' + e.message)
-                return False
+                log(output, 'Failed to execute task!')
+                log(output, '  ' + e.message)
+                return False, output
 
         elif words[0] == 'save': # Save
             if len(words) != 2:
-                print('Unknown number of arguments!')
-                return False
+                log(output, 'Unknown number of arguments!')
+                return False, output
 
             try:
-                path = words[1] + '.rmapp'
+                path = '../projects/' + words[1] + '.rmapp'
                 save(main.timeline, path)
                 
-                print('Project saved to ' + path)
-                return True
+                log(output, 'Project saved to ' + path)
+                return True, output
                 
             except Exception as e:
-                print('Failed to save timeline!')
-                print('  ' + str(e))
-                return False
+                log(output, 'Failed to save timeline!')
+                log(output, '  ' + str(e))
+                return False, output
                 
         elif words[0] == 'load': # Load
             if len(words) != 2:
-                print('Unknown number of arguments!')
-                return False
+                log(output, 'Unknown number of arguments!')
+                return False, output
 
             try:
-                path = words[1] + '.rmapp'
+                path = '../projects/' + words[1] + '.rmapp'
                 main.timeline = load(path)
 
-                print('Timeline loaded from ' + path)
-                return True
+                log(output, 'Timeline loaded from ' + path)
+                return True, output
                 
             except Exception as e:
-                print('Failed to load timeline!')
-                print('  ' + str(e))
-                return False
+                log(output, 'Failed to load timeline!')
+                log(output, '  ' + str(e))
+                return False, output
 
         elif words[0] == 'print': # Print
             if len(words) != 1:
-                print('Unknown number of arguments!')
-                return False
+                log(output, 'Unknown number of arguments!')
+                return False, output
 
             try:
-                print('Project Hierarchy:')
-                printSceneRecursive(main.timeline.getRoot(), 0)
+                log(output, 'Project Hierarchy:')
+                printSceneRecursive(output, main.timeline.getRoot(), 0)
 
-                return True
+                return True, output
             
             except Exception as e:
-                print('Failed to print timeline!')
-                print('  ' + str(e))
-                return False
+                log(output, 'Failed to print timeline!')
+                log(output, '  ' + str(e))
+                return False, output
 
-        print('Unknown command: ' + words[0])
-        return False
+        elif words[0] == 'clear': # Clear
+            if len(words) != 1:
+                log(output, 'Unknown number of arguments!')
+                return False, output
+
+            try:
+                main.console.clear()
+
+                return True, output
+            
+            except Exception as e:
+                log(output, 'Failed to clear console!')
+                log(output, '  ' + str(e))
+                return False, output
+
+        log(output, 'Unknown command: ' + words[0])
+        return False, output
     
     except Exception as e:
-        print('Failed to parse command!')
-        print('  ' + str(e))
-        return False
+        log(output, 'Failed to parse command!')
+        log(output, '  ' + str(e))
+        return False, output
 
-def printSceneRecursive(task, depth):
+def printSceneRecursive(output, task, depth):
     if task == None:
         return
     
-    print('  ' * depth + task.name)
+    log(output, '  ' * depth + task.name)
 
     for step in task.steps:
-        printSceneRecursive(step, depth + 1)
+        printSceneRecursive(output, step, depth + 1)

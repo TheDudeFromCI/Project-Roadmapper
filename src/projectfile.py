@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os.path
+import os
 from tasks import Timeline
 from tasks import Task
 
@@ -13,6 +13,14 @@ Attributes:
     path -- The path of the file to save to.
 """
 def save(timeline, path):
+    basePath = os.path.dirname(os.path.realpath(__file__))
+    path = os.path.join(basePath, './' + path)
+
+    try:
+        os.makedirs(os.path.dirname(path))
+    except:
+        pass
+        
     file = open(path, 'w')
     
     for task in timeline.tasks:
@@ -35,6 +43,9 @@ Attributes:
     path -- The path of the file to load.
 """
 def load(path):
+    basePath = os.path.dirname(os.path.realpath(__file__))
+    path = os.path.join(basePath, './' + path)
+    
     try:
         file = open(path, 'r')
         lines = file.readlines()
